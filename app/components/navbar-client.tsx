@@ -91,10 +91,6 @@ export default function NavbarClient() {
           </div>
 
           <div className="hidden md:flex items-center space-x-4">
-            <Button variant="outline" asChild>
-              <Link href="/portal">Job Portal</Link>
-            </Button>
-
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
