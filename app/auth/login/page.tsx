@@ -117,12 +117,16 @@ export default function LoginPage() {
           window.location.href = "/";
         }
       } else {
-        showMessage("Failed to login. Please try again.");
+        showMessage(data.error || "Failed to login. Please try again.");
         setLoading(false);
       }
     } catch (err: any) {
       console.error("Google login error:", err);
-      if (err.code !== "auth/popup-closed-by-user") {
+      if (err.code === "auth/popup-blocked") {
+        showMessage("Popup was blocked. Please allow popups and try again.");
+      } else if (err.code === "auth/popup-closed-by-user") {
+        setMessage("");
+      } else {
         showMessage("Google login failed. Please try again.");
       }
       setLoading(false);
