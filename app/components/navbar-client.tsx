@@ -78,8 +78,7 @@ export default function NavbarClient() {
             </span>
           </Link>
 
-          <div className="hidden md:flex items-center justify-center flex-1 px-8">
-            <div className="flex items-center space-x-8 ml-[21px]">
+          <div className="hidden md:flex items-center space-x-8">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
@@ -89,7 +88,6 @@ export default function NavbarClient() {
                 {link.label}
               </Link>
             ))}
-            </div>
           </div>
 
           <div className="hidden md:flex items-center space-x-4 ml-auto">
