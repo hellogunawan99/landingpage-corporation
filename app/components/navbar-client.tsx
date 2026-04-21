@@ -65,7 +65,7 @@ export default function NavbarClient() {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
-          <Link href="/" className="flex items-center">
+          <Link href="/" className="flex items-center flex-shrink-0">
             <span
               className="text-2xl font-bold"
               style={{
@@ -78,7 +78,8 @@ export default function NavbarClient() {
             </span>
           </Link>
 
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center justify-center flex-1 px-8">
+            <div className="flex items-center space-x-8">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
@@ -88,9 +89,10 @@ export default function NavbarClient() {
                 {link.label}
               </Link>
             ))}
+            </div>
           </div>
 
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden md:flex items-center space-x-4 ml-auto">
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
