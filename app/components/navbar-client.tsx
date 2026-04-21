@@ -23,7 +23,6 @@ export default function NavbarClient() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    // Check localStorage for user (email/password login)
     const storedUser = localStorage.getItem("currentUser");
     if (storedUser) {
       try {
@@ -44,10 +43,8 @@ export default function NavbarClient() {
   }, []);
 
   const handleSignOut = async () => {
-    // Clear localStorage
     localStorage.removeItem("currentUser");
     setUser(null);
-    // Redirect to home
     window.location.href = "/";
   };
 
@@ -78,19 +75,21 @@ export default function NavbarClient() {
             </span>
           </Link>
 
-          <div className="hidden md:flex items-center space-x-8">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="text-gray-600 hover:text-primary transition-colors font-medium"
-              >
-                {link.label}
-              </Link>
-            ))}
+          <div className="hidden md:block absolute left-1/2 transform -translate-x-1/2">
+            <div className="flex items-center space-x-8">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="text-gray-600 hover:text-primary transition-colors font-medium whitespace-nowrap"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
           </div>
 
-          <div className="hidden md:flex items-center space-x-4 ml-auto">
+          <div className="hidden md:flex items-center space-x-4">
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -171,11 +170,6 @@ export default function NavbarClient() {
               </Link>
             ))}
             <div className="pt-4 space-y-2">
-              <Button variant="outline" className="w-full" asChild>
-                <Link href="/portal" onClick={() => setIsMobileMenuOpen(false)}>
-                  Job Portal
-                </Link>
-              </Button>
               {user ? (
                 <>
                   {user.role === "ADMIN" && (
