@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FcGoogle } from "react-icons/fc";
 import { Loader2 } from "lucide-react";
+import brand from "@/config/brand";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -148,14 +149,14 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-900">Welcome Back</h2>
-          <p className="mt-2 text-gray-600">Sign in to Tunaskarya</p>
+          <h2 className="text-3xl font-bold text-gray-900">{brand.auth.login.title}</h2>
+          <p className="mt-2 text-gray-600">{brand.auth.login.subtitle}</p>
         </div>
 
         <Card>
           <CardHeader>
-            <CardTitle>Sign In</CardTitle>
-            <CardDescription>Choose your preferred sign in method</CardDescription>
+            <CardTitle>{brand.auth.login.title}</CardTitle>
+            <CardDescription>{brand.auth.login.subtitle}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             {message && (
@@ -176,7 +177,7 @@ export default function LoginPage() {
               ) : (
                 <FcGoogle className="mr-2 h-4 w-4" />
               )}
-              Sign in with Google
+              {brand.auth.login.googleButton}
             </Button>
 
             <div className="relative">
@@ -185,7 +186,7 @@ export default function LoginPage() {
               </div>
               <div className="relative flex justify-center text-xs uppercase">
                 <span className="bg-background px-2 text-muted-foreground">
-                  Or continue with
+                  {brand.auth.login.dividerText}
                 </span>
               </div>
             </div>
@@ -199,7 +200,7 @@ export default function LoginPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
+                  placeholder={brand.auth.login.emailPlaceholder}
                   required
                   className="mt-1"
                 />
@@ -213,7 +214,7 @@ export default function LoginPage() {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password"
+                  placeholder={brand.auth.login.passwordPlaceholder}
                   required
                   className="mt-1"
                 />
@@ -226,15 +227,15 @@ export default function LoginPage() {
                     Signing in...
                   </>
                 ) : (
-                  "Sign In"
+                  brand.auth.login.submitButton
                 )}
               </Button>
             </form>
 
             <p className="text-center text-sm text-gray-600">
-              Don't have an account?{" "}
+              {brand.auth.login.noAccountText}{" "}
               <Link href="/auth/register" className="text-blue-600 hover:underline">
-                Sign up
+                {brand.auth.login.signUpLink}
               </Link>
             </p>
           </CardContent>

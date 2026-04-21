@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FcGoogle } from "react-icons/fc";
 import { Loader2 } from "lucide-react";
+import brand from "@/config/brand";
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -55,14 +56,10 @@ export default function RegisterPage() {
 
       if (data.success && data.user) {
         localStorage.setItem("currentUser", JSON.stringify(data.user));
-        
-        if (data.user.role === "ADMIN") {
-          window.location.href = "/admin/dashboard";
-        } else {
-          window.location.href = "/";
-        }
-      } else {
         window.location.href = "/";
+      } else {
+        setError(data.error || "Registration failed. Please try again.");
+        setLoading(false);
       }
     } catch (err: any) {
       console.error("Registration error:", err);
@@ -82,31 +79,8 @@ export default function RegisterPage() {
     setError("");
 
     try {
-      const { auth, signInWithPopup, googleProvider } = await import("@/firebase");
-      const result = await signInWithPopup(auth, googleProvider);
-      
-      const res = await fetch("/api/auth/google-login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: result.user.email,
-          name: result.user.displayName,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (data.success && data.user) {
-        localStorage.setItem("currentUser", JSON.stringify(data.user));
-        
-        if (data.user.role === "ADMIN") {
-          window.location.href = "/admin/dashboard";
-        } else {
-          window.location.href = "/";
-        }
-      } else {
-        window.location.href = "/";
-      }
+      const { auth, signInWithRedirect, googleProvider } = await import("@/firebase");
+      await signInWithRedirect(auth, googleProvider);
     } catch (err: any) {
       if (err.code !== "auth/popup-closed-by-user") {
         setError("Google registration failed");
@@ -119,19 +93,24 @@ export default function RegisterPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-900">Job Seeker Registration</h2>
-          <p className="mt-2 text-gray-600">Create an account to find overseas jobs</p>
+          <h2 className="text-3xl font-bold text-gray-900">{brand.auth.register.title}</h2>
+          <p className="mt-2 text-gray-600">{brand.auth.register.subtitle}</p>
         </div>
 
         <Card>
           <CardHeader>
-            <CardTitle>Create Account</CardTitle>
-            <CardDescription>
-              For Job Seekers only. Employers are created by admin.
-            </CardDescription>
+            <CardTitle>{brand.auth.register.title}</CardTitle>
+            <CardDescription>{brand.auth.register.subtitle}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
+            {error && (
+              <div className="bg-red-50 text-red-600 px-4 py-3 rounded-md text-sm">
+                {error}
+              </div>
+            )}
+
             <Button
+              type="button"
               variant="outline"
               className="w-full"
               onClick={handleGoogleRegister}
@@ -142,21 +121,17 @@ export default function RegisterPage() {
               ) : (
                 <FcGoogle className="h-5 w-5 mr-2" />
               )}
-              Continue with Google
+              {brand.auth.register.googleButton}
             </Button>
-
-            {error && (
-              <div className="bg-red-50 text-red-600 p-3 rounded-md text-sm">
-                {error}
-              </div>
-            )}
 
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white px-2 text-gray-500">Or register with email</span>
+                <span className="bg-background px-2 text-muted-foreground">
+                  {brand.auth.register.dividerText}
+                </span>
               </div>
             </div>
 
@@ -166,9 +141,10 @@ export default function RegisterPage() {
                 <Input
                   id="name"
                   name="name"
+                  type="text"
                   value={formData.name}
                   onChange={handleChange}
-                  placeholder="John Doe"
+                  placeholder={brand.auth.register.namePlaceholder}
                   required
                   className="mt-1"
                 />
@@ -182,7 +158,7 @@ export default function RegisterPage() {
                   type="email"
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder="you@example.com"
+                  placeholder={brand.auth.register.emailPlaceholder}
                   required
                   className="mt-1"
                 />
@@ -209,8 +185,7 @@ export default function RegisterPage() {
                   type="password"
                   value={formData.password}
                   onChange={handleChange}
-                  placeholder="Min. 6 characters"
-                  minLength={6}
+                  placeholder={brand.auth.register.passwordPlaceholder}
                   required
                   className="mt-1"
                 />
@@ -224,7 +199,7 @@ export default function RegisterPage() {
                   type="password"
                   value={formData.confirmPassword}
                   onChange={handleChange}
-                  placeholder="••••••••"
+                  placeholder={brand.auth.register.confirmPasswordPlaceholder}
                   required
                   className="mt-1"
                 />
@@ -237,19 +212,17 @@ export default function RegisterPage() {
                     Creating account...
                   </>
                 ) : (
-                  "Create Account"
+                  brand.auth.register.submitButton
                 )}
               </Button>
             </form>
 
-            <div className="text-center text-sm text-gray-600">
-              <p>
-                Already have an account?{" "}
-                <Link href="/auth/login" className="text-primary hover:underline">
-                  Sign in
-                </Link>
-              </p>
-            </div>
+            <p className="text-center text-sm text-gray-600">
+              {brand.auth.register.hasAccountText}{" "}
+              <Link href="/auth/login" className="text-blue-600 hover:underline">
+                {brand.auth.register.signInLink}
+              </Link>
+            </p>
           </CardContent>
         </Card>
       </div>

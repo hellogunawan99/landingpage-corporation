@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Loader2, Users, Activity, LogOut, Home } from "lucide-react";
+import brand from "@/config/brand";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
@@ -43,8 +44,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         style={{ width: "16rem" }}
       >
         <div className="p-6 border-b">
-          <h2 className="text-xl font-bold text-gray-900">Admin Panel</h2>
-          <p className="text-sm text-gray-500 mt-1">Management Dashboard</p>
+          <h2 className="text-xl font-bold text-gray-900">{brand.admin.title}</h2>
+          <p className="text-sm text-gray-500 mt-1">{brand.admin.subtitle}</p>
         </div>
 
         <nav className="flex-1 p-4 space-y-2">
@@ -60,6 +61,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     ? "bg-blue-50 text-blue-600 border-l-4 border-blue-600"
                     : "text-gray-600 hover:bg-gray-50"
                 }`}
+                style={{
+                  borderLeftColor: isActive ? brand.colors.primary : "transparent",
+                }}
               >
                 <Icon className="h-5 w-5" />
                 <span className="font-medium">{item.label}</span>

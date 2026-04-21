@@ -12,13 +12,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import brand from "@/config/brand";
 
-const navLinks = [
-  { href: "/", label: "Home" },
-  { href: "/#destinations", label: "Destinations" },
-  { href: "/#categories", label: "Categories" },
-  { href: "/#how-it-works", label: "How It Works" },
-];
+const navLinks = brand.navigation.items;
 
 export default function NavbarClient() {
   const [user, setUser] = useState<any>(null);
@@ -70,8 +66,15 @@ export default function NavbarClient() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
           <Link href="/" className="flex items-center">
-            <span className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              Tunaskarya
+            <span
+              className="text-2xl font-bold"
+              style={{
+                background: `linear-gradient(to right, ${brand.colors.primary}, ${brand.colors.secondary})`,
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+            >
+              {brand.company.name}
             </span>
           </Link>
 
@@ -108,7 +111,7 @@ export default function NavbarClient() {
                       <DropdownMenuItem asChild>
                         <Link href="/admin/dashboard" className="flex items-center">
                           <LayoutDashboard className="h-4 w-4 mr-2" />
-                          Admin Dashboard
+                          {brand.admin.title}
                         </Link>
                       </DropdownMenuItem>
                     </>
@@ -183,7 +186,7 @@ export default function NavbarClient() {
                     <>
                       <Button variant="outline" className="w-full" asChild>
                         <Link href="/admin/dashboard" onClick={() => setIsMobileMenuOpen(false)}>
-                          Admin Dashboard
+                          {brand.admin.title}
                         </Link>
                       </Button>
                     </>
