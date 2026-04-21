@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,10 +13,52 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [message, setMessage] = useState("");
 
   const showMessage = (msg: string) => {
     setMessage(msg);
+  };
+
+  useEffect(() => {
+    handleGoogleRedirectCallback();
+  }, []);
+
+  const handleGoogleRedirectCallback = async () => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("google") === "callback") {
+      setGoogleLoading(true);
+      try {
+        const { auth, getRedirectResult } = await import("@/firebase");
+        const result = await getRedirectResult(auth);
+        
+        if (result && result.user) {
+          const userEmail = result.user.email;
+          const userName = result.user.displayName;
+          
+          const res = await fetch("/api/auth/google-login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: userEmail, name: userName }),
+          });
+          
+          const data = await res.json();
+          
+          if (data.success && data.user) {
+            localStorage.setItem("currentUser", JSON.stringify(data.user));
+            if (data.user.role === "ADMIN") {
+              window.location.href = "/admin/dashboard";
+            } else {
+              window.location.href = "/";
+            }
+            return;
+          }
+        }
+      } catch (err) {
+        console.error("Google redirect error:", err);
+      }
+      setGoogleLoading(false);
+    }
   };
 
   const handleEmailLogin = async (e: React.FormEvent) => {
@@ -30,7 +72,6 @@ export default function LoginPage() {
       try {
         await signInWithEmailAndPassword(auth, email, password);
       } catch (firebaseError: any) {
-        // Firebase authentication failed - show specific Firebase error
         const errorCode = firebaseError.code;
         
         if (errorCode === "auth/user-not-found" || errorCode === "auth/invalid-credential") {
@@ -43,8 +84,6 @@ export default function LoginPage() {
           showMessage("Please enter a valid email address");
         } else if (errorCode === "auth/network-request-failed") {
           showMessage("Network error. Please check your connection.");
-        } else if (errorCode === "auth/popup-closed-by-user") {
-          showMessage("");
         } else {
           showMessage("Login failed. Please check your credentials.");
         }
@@ -52,7 +91,6 @@ export default function LoginPage() {
         return;
       }
 
-      // Step 2: Firebase auth succeeded - now check our database
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -67,7 +105,6 @@ export default function LoginPage() {
         return;
       }
 
-      // Step 3: Store user info and redirect
       if (data.user) {
         localStorage.setItem("currentUser", JSON.stringify(data.user));
       }
@@ -85,53 +122,29 @@ export default function LoginPage() {
   };
 
   const handleGoogleLogin = async () => {
-    setLoading(true);
+    setGoogleLoading(true);
     setMessage("");
     
     try {
-      const { auth, signInWithPopup, googleProvider } = await import("@/firebase");
-      const result = await signInWithPopup(auth, googleProvider);
-      
-      // Get user info from Firebase result
-      const userEmail = result.user.email;
-      const userName = result.user.displayName;
-      
-      // Update our database
-      const res = await fetch("/api/auth/google-login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: userEmail,
-          name: userName,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (data.success && data.user) {
-        localStorage.setItem("currentUser", JSON.stringify(data.user));
-        
-        if (data.user.role === "ADMIN") {
-          window.location.href = "/admin/dashboard";
-        } else {
-          window.location.href = "/";
-        }
-      } else {
-        showMessage(data.error || "Failed to login. Please try again.");
-        setLoading(false);
-      }
+      const { auth, signInWithRedirect, googleProvider } = await import("@/firebase");
+      await signInWithRedirect(auth, googleProvider);
     } catch (err: any) {
       console.error("Google login error:", err);
-      if (err.code === "auth/popup-blocked") {
-        showMessage("Popup was blocked. Please allow popups and try again.");
-      } else if (err.code === "auth/popup-closed-by-user") {
-        setMessage("");
-      } else {
-        showMessage("Google login failed. Please try again.");
-      }
-      setLoading(false);
+      showMessage("Google login failed. Please try again.");
+      setGoogleLoading(false);
     }
   };
+
+  if (googleLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto" />
+          <p className="mt-4 text-gray-600">Completing Google sign-in...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
@@ -152,6 +165,32 @@ export default function LoginPage() {
                 {message}
               </div>
             )}
+
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleGoogleLogin}
+              disabled={googleLoading}
+              className="w-full"
+            >
+              {googleLoading ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <FcGoogle className="mr-2 h-4 w-4" />
+              )}
+              Sign in with Google
+            </Button>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">
+                  Or continue with
+                </span>
+              </div>
+            </div>
 
             <form onSubmit={handleEmailLogin} className="space-y-4">
               <div>
@@ -193,32 +232,6 @@ export default function LoginPage() {
                 )}
               </Button>
             </form>
-
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">
-                  Or continue with
-                </span>
-              </div>
-            </div>
-
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleGoogleLogin}
-              disabled={loading}
-              className="w-full"
-            >
-              {loading ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <FcGoogle className="mr-2 h-4 w-4" />
-              )}
-              Sign in with Google
-            </Button>
 
             <p className="text-center text-sm text-gray-600">
               Don't have an account?{" "}
