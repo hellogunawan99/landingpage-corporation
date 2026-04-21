@@ -13,7 +13,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(true);
   const [message, setMessage] = useState("");
 
   const showMessage = (msg: string) => {
@@ -21,20 +21,17 @@ export default function LoginPage() {
   };
 
   useEffect(() => {
-    handleGoogleRedirectCallback();
+    checkFirebaseAuth();
   }, []);
 
-  const handleGoogleRedirectCallback = async () => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("google") === "callback") {
-      setGoogleLoading(true);
-      try {
-        const { auth, getRedirectResult } = await import("@/firebase");
-        const result = await getRedirectResult(auth);
-        
-        if (result && result.user) {
-          const userEmail = result.user.email;
-          const userName = result.user.displayName;
+  const checkFirebaseAuth = async () => {
+    try {
+      const { auth, onAuthStateChanged } = await import("@/firebase");
+      
+      onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          const userEmail = user.email;
+          const userName = user.displayName;
           
           const res = await fetch("/api/auth/google-login", {
             method: "POST",
@@ -54,9 +51,10 @@ export default function LoginPage() {
             return;
           }
         }
-      } catch (err) {
-        console.error("Google redirect error:", err);
-      }
+        setGoogleLoading(false);
+      });
+    } catch (err) {
+      console.error("Auth check error:", err);
       setGoogleLoading(false);
     }
   };
@@ -122,7 +120,7 @@ export default function LoginPage() {
   };
 
   const handleGoogleLogin = async () => {
-    setGoogleLoading(true);
+    setLoading(true);
     setMessage("");
     
     try {
@@ -131,7 +129,7 @@ export default function LoginPage() {
     } catch (err: any) {
       console.error("Google login error:", err);
       showMessage("Google login failed. Please try again.");
-      setGoogleLoading(false);
+      setLoading(false);
     }
   };
 
@@ -140,7 +138,7 @@ export default function LoginPage() {
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto" />
-          <p className="mt-4 text-gray-600">Completing Google sign-in...</p>
+          <p className="mt-4 text-gray-600">Checking login status...</p>
         </div>
       </div>
     );
@@ -170,10 +168,10 @@ export default function LoginPage() {
               type="button"
               variant="outline"
               onClick={handleGoogleLogin}
-              disabled={googleLoading}
+              disabled={loading}
               className="w-full"
             >
-              {googleLoading ? (
+              {loading ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
                 <FcGoogle className="mr-2 h-4 w-4" />
